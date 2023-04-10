@@ -1,16 +1,17 @@
 package com.shpp.level0.practice;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonRootName;
+
+@JsonRootName("Greetings")
 public class Message {
-    private static final String GREETINGS = "Привіт";
-    private static final String EXCLAMATION_POINT = "!";
+
     private final String message;
 
-    public Message(String name) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(name).append(GREETINGS).append(EXCLAMATION_POINT);
-        this.message = builder.toString();
+    public Message(String message) {
+        this.message = message;
     }
-
+    @JsonGetter("message")
     public String getMessage() {
         return message;
     }
