@@ -1,7 +1,5 @@
 package com.shpp.level0.practice;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -18,10 +16,10 @@ import java.util.Properties;
 
 public class App {
     public static final String PROPERTIES_FILE_NAME = "app.properties";
-    public static final String USERNAME_PROPERTIES_KEY = "username";
-    private static final String OUTPUT_FORMAT_KEY = "type";
+    public static final String USERNAME_KEY = "username";
+    private static final String SYSTEM_OPTION_KEY = "format";
     private static final String XML_OUTPUT_FORMAT = "xml";
-    private static final String GREETINGS_LINE = "Привіт";
+    private static final String GREETING_LINE = "Привіт";
     private static final String EXCLAMATION_POINT = "!";
     private static final Logger logger = LoggerFactory.getLogger(App.class);
 
@@ -30,23 +28,13 @@ public class App {
     }
 
     void run() {
-        class Message{
-            @JsonValue
-            public final String message;
-
-            public Message(String message) {
-                this.message = message;
-            }
-        }
-        String message;
-        String path;
         Properties properties = getJarProperties();
-        path = getPathToExternalProperties();
-        properties.putAll(getExternalProperties(path));
-        String name = properties.getProperty(USERNAME_PROPERTIES_KEY);
-        message = GREETINGS_LINE + " " + name + EXCLAMATION_POINT;
+        String externalPropertiesPath = getPathToExternalProperties();
+        properties.putAll(getExternalProperties(externalPropertiesPath));
+        String name = properties.getProperty(USERNAME_KEY);
+        String message = GREETING_LINE + " " + name + EXCLAMATION_POINT;
         Message greetingMessage = new Message(message);
-        if (fileTypeSetToXml(OUTPUT_FORMAT_KEY)) {
+        if (isFileTypeXml(SYSTEM_OPTION_KEY)) {
             message = transformMessage(greetingMessage, new XmlMapper());
         } else {
             message = transformMessage(greetingMessage, new ObjectMapper());
@@ -55,11 +43,11 @@ public class App {
     }
 
     private String getPathToExternalProperties() {
-        File file  = new File (App.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+        File file = new File(App.class.getProtectionDomain().getCodeSource().getLocation().getPath());
         return file.getParentFile().getPath();
     }
 
-    private boolean fileTypeSetToXml(String key) {
+    private boolean isFileTypeXml(String key) {
         String property = System.getProperty(key);
         return property != null && property.equals(XML_OUTPUT_FORMAT);
     }
@@ -93,6 +81,14 @@ public class App {
             return mapper.writeValueAsString(message);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Can't processed message object" + message, e);
+        }
+    }
+
+    static class Message {
+        public final String message;
+
+        public Message(String message) {
+            this.message = message;
         }
     }
 }
