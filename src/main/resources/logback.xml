@@ -9,13 +9,14 @@
                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                xsi:schemaLocation="http://ch.qos.logback/xml/ns/logback https://raw.githubusercontent.com/enricopulatzo/logback-XSD/master/src/main/xsd/logback.xsd">
 
+
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%-5level [%thread] %date{dd MMMM yyyy HH:mm:ss} %logger Line:%line %message %n</pattern>
+            <pattern>%-5level %d{dd MMMM yyyy HH:mm:ss} %c Line:%line %message %n</pattern>
         </encoder>
     </appender>
 
-    <root level="INFO">
+    <root level="TRACE">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>
