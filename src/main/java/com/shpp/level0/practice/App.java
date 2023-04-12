@@ -28,7 +28,8 @@ public class App {
 
     void run() {
         Properties currentProperties = mergeProperties(getJarProperties(), getExternalProperties());
-        Message greetingMessage = new Message(getMessage(currentProperties, USERNAME_KEY));
+        String name = currentProperties.getProperty(USERNAME_KEY);
+        Message greetingMessage = getMessage(name);
         String message = getFormattedMessage(greetingMessage);
         logger.trace("Printing message");
         System.out.println(message);
@@ -42,10 +43,9 @@ public class App {
 
     }
 
-    private String getMessage(Properties currentProperties, String usernameKey) {
+    private Message getMessage(String name) {
         logger.trace("Processing new message");
-        String name = currentProperties.getProperty(usernameKey);
-        return GREETING_LINE + " " + name + EXCLAMATION_POINT;
+        return new Message(GREETING_LINE + " " + name + EXCLAMATION_POINT);
     }
 
     private Properties mergeProperties(Properties internalProperties, Properties externalProperties) {
