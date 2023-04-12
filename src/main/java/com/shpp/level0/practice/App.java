@@ -1,5 +1,6 @@
 package com.shpp.level0.practice;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -20,6 +21,7 @@ public class App {
     private static final String XML_FORMAT_VALUE = "xml";
     private static final String GREETING_LINE = "Привіт";
     private static final String EXCLAMATION_POINT = "!";
+
     private static final Logger logger = LoggerFactory.getLogger(App.class);
 
     public static void main(String[] args) {
@@ -28,24 +30,23 @@ public class App {
 
     void run() {
         Properties currentProperties = mergeProperties(getJarProperties(), getExternalProperties());
-        Message greetingMessage = new Message(getMessage(currentProperties, USERNAME_KEY));
+        String name = currentProperties.getProperty(USERNAME_KEY);
+        Message greetingMessage = getMessage(name);
         String message = getFormattedMessage(greetingMessage);
-        logger.trace("Printing message");
-        System.out.println(message);
+        logger.info("Printing the message{}{}", System.lineSeparator(), message);
     }
 
     private String getFormattedMessage(Message greetingMessage) {
-        logger.trace("Formatting message to a specific type");
+        logger.trace("Formatting the message with the specified type");
         return isFileTypeXml(SYSTEM_OPTION_FILE_FORMAT_KEY)
                 ? transformMessage(greetingMessage, new XmlMapper()) :
                 transformMessage(greetingMessage, new ObjectMapper());
 
     }
 
-    private String getMessage(Properties currentProperties, String usernameKey) {
-        logger.trace("Processing new message");
-        String name = currentProperties.getProperty(usernameKey);
-        return GREETING_LINE + " " + name + EXCLAMATION_POINT;
+    private Message getMessage(String name) {
+        logger.trace("Processing a new greeting message");
+        return new Message(GREETING_LINE + " " + name + EXCLAMATION_POINT);
     }
 
     private Properties mergeProperties(Properties internalProperties, Properties externalProperties) {
@@ -67,7 +68,7 @@ public class App {
     }
 
     private Properties getJarProperties() {
-        logger.info("Reading internal properties file");
+        logger.info("Reading an internal properties file");
         try {
             Properties properties = new Properties();
             properties.load(new InputStreamReader(Objects.requireNonNull(getClass()
@@ -79,16 +80,17 @@ public class App {
     }
 
     private Properties getExternalProperties() {
-        logger.info("Reading external properties file");
+        logger.info("Reading an external properties file");
         String path = getPathToExternalProperties();
         Properties properties = new Properties();
-        try {
-            properties.load(new FileReader(path + "/" + PROPERTIES_FILE_NAME, StandardCharsets.UTF_8));
+        try (FileReader reader = new FileReader(path + "/"
+                + PROPERTIES_FILE_NAME, StandardCharsets.UTF_8)) {
+            properties.load(reader);
             return properties;
         } catch (IOException e) {
-            logger.warn("The external properties file " + path + PROPERTIES_FILE_NAME
-                    + " not found" + System.lineSeparator()
-                    + "The program will be executed with default properties file");
+            logger.warn(String.format("The external properties file %s%s not found%s" +
+                    "The program will be executed with an internal properties file",
+                    path, PROPERTIES_FILE_NAME, System.lineSeparator()));
         }
         return properties;
     }
@@ -108,7 +110,7 @@ public class App {
             logger.trace("Creating a new Message instance");
             this.message = message;
         }
-
+        @JsonGetter
         public String getMessage() {
             return message;
         }
